@@ -23,8 +23,9 @@ public class Message {
     private LocalDateTime timestamp;
 
     @ManyToOne
-    @JoinColumn(name="user_id",nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
     public Message() {
         this.timestamp = LocalDateTime.now();
     }

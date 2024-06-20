@@ -1,13 +1,12 @@
 package org.example.backend.web;
 
+import org.example.backend.chat.ChatMessage;
 import org.example.backend.chat.ChatService;
-import org.example.backend.chat.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
-
-import java.security.Principal;
 
 @Controller
 public class WebSocketHandler {
@@ -19,13 +18,10 @@ public class WebSocketHandler {
         this.chatService = chatService;
     }
 
-    @MessageMapping("/chat.login")
-    public void sendLoginMessage(String loginId) {
-        chatService.sendLoginMessage(loginId);
-    }
-
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload Message message, Principal principal) {
-        chatService.sendMessage(message, principal);
+    @SendTo("/sub/chat")
+    public ChatMessage send(@Payload ChatMessage message) throws Exception {
+        message.setSender("hi");
+        return message; // 받은 메시지를 그대로 반환
     }
 }
