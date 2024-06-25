@@ -44,7 +44,7 @@ public class User {
     @Column(name = "updated_at", nullable = false, insertable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Timestamp updatedAt;
 
-    @Column(name = "`delete`", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
+    @Column(name = "`delete_flag`", nullable = false, columnDefinition = "TINYINT DEFAULT 0")
     private boolean delete;
 
     @Column(name = "login_at" , nullable = true)
