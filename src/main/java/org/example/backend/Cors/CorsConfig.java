@@ -12,7 +12,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000"); // 모든 오리진에서 요청 허용
+                .allowedOrigins("http://krampoline:3000"); // 모든 오리진에서 요청 허용
 
 
 //                .allowedMethods("GET", "POST", "PUT", "DELETE") // 허용할 HTTP 메서드 설정
