@@ -31,8 +31,10 @@ kind: Service
 metadata:
   name: krampoline
 spec:
+  type: NodePort
   ports:
     - port: 3000
       targetPort: 3000
+      nodePort: 30001 # 30000-32767 범위 내의 포트 지정
   selector:
     app: krampoline
