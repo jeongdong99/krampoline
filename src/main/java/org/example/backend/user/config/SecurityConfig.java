@@ -1,6 +1,5 @@
 package org.example.backend.user.config;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.example.backend.user.filter.JWTFilter;
 import org.example.backend.user.jwt.JWTUtil;
@@ -17,76 +16,67 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.Collections;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    // AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
-
-    // JWTUtil 주입
     private final JWTUtil jwtUtil;
 
-    // AuthenticationManager Bean 등록
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
 
-    // (password 암호화) BCryptPasswordEncoder 등록
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(Collections.singletonList("*")); // 모든 출처 허용
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 모든 HTTP 메서드 허용
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Collections.singletonList("*")); // 모든 헤더 허용
+        configuration.setMaxAge(3600L); // 설정 캐시 시간
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "UserId", "UsersId")); // 노출할 헤더
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        // CORS 설정
         http
-                .cors((corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
-                        CorsConfiguration configuration = new CorsConfiguration();
-
-                        configuration.setAllowedOrigins(Collections.singletonList("*"));
-                        configuration.setAllowedMethods(Collections.singletonList("*"));
-                        configuration.setAllowCredentials(true);
-                        configuration.setAllowedHeaders(Collections.singletonList("*"));
-                        configuration.setMaxAge(3600L);
-                        configuration.setExposedHeaders(Arrays.asList("Authorization", "UserId", "UsersId"));
-
-                        return configuration;
-                    }
-                })));
-
-        // REST API 설정
-        http
-                .csrf((auth) -> auth.disable()) // csrf 비활성
-                .httpBasic((auth) -> auth.disable()) // http basic 인증 방식 비활성
-                .formLogin((auth) -> auth.disable()) // 폼로그인 방식 비활성
-                // 경로별 인가 작업
-                .authorizeHttpRequests((auth) -> auth
-                        // 인증 없이 접근 허용
-                        .requestMatchers("/login", "/sign-up","/ws/**", "/email-authentication",
-                                "/find-userid", "/find-password", "/reset-password", "/check-userid", "/check-nickname").permitAll()
-                        // 그 외의 모든 요청은 인증된 사용자만 접근
-                        .anyRequest().authenticated())
-                // 세션 설정
+                .csrf(csrf -> csrf.disable()) // csrf 비활성
+                .httpBasic(httpBasic -> httpBasic.disable()) // http basic 인증 방식 비활성
+                .formLogin(formLogin -> formLogin.disable()) // 폼로그인 방식 비활성
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // 세션 설정
+
+        http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/login", "/sign-up", "/ws/**", "/email-authentication",
+                        "/find-userid", "/find-password", "/reset-password", "/check-userid", "/check-nickname").permitAll()
+                .anyRequest().authenticated()); // 경로별 인가 작업
+
+        // CORS 설정 적용
+        http.cors(withDefaults());
 
         // JWTFilter 등록
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
