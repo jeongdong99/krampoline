@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: springboot-backend
-          image: krmp-d2hub-idock.9rum.cc/dev-test/repo_aa943950480d
+          image: krmp-d2hub-idock.9rum.cc/dev-test/repo_0771b50674b4
           env:
             - name: DB_URL
               valueFrom:
