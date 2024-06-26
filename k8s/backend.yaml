@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: springboot-backend
+  labels:
+    app: springboot-backend
 spec:
   selector:
     matchLabels:
@@ -14,7 +16,9 @@ spec:
     spec:
       containers:
         - name: springboot-backend
-          image: krmp-d2hub-idock.9rum.cc/dev-test/repo_72600d1c5878
+          image: krmp-d2hub-idock.9rum.cc/dev-test/repo_0771b50674b4
+          ports:
+            - containerPort: 8080
           env:
             - name: DB_URL
               valueFrom:
@@ -36,5 +40,28 @@ spec:
                 secretKeyRef:
                   name: db-credentials
                   key: db_driver
-          ports:
-            - containerPort: 8080
+            - name: SPRING_MAIL_HOST
+              value: smtp.naver.com
+            - name: SPRING_MAIL_PORT
+              value: "465"
+            - name: SPRING_MAIL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: email-credentials
+                  key: username
+            - name: SPRING_MAIL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: email-credentials
+                  key: password
+            - name: SPRING_MAIL_DEBUG
+              value: "true"
+            - name: SPRING_MAIL_SMTP_AUTH
+              value: "true"
+            - name: SPRING_MAIL_SMTP_SSL_ENABLE
+              value: "true"
+            - name: SPRING_MAIL_SMTP_SSL_TRUST
+              value: smtp.naver.com
+            - name: SPRING_MAIL_SMTP_STARTTLS_ENABLE
+              value: "true"
+
