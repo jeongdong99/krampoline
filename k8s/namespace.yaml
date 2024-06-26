@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-smtp-outbound
+  namespace: email-naver  # 네트워크 정책을 적용할 네임스페이스의 이름
+spec:
+  podSelector:
+    matchLabels:
+      app: springboot-backend  # 해당 정책을 적용할 Pod의 label 선택
+  policyTypes:
+    - Egress  # Egress 정책은 외부로의 통신을 허용합니다.
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 125.209.235.0/24  # SMTP 서버의 IP 범위. 예를 들어, 네이버 SMTP 서버의 IP 범위
+      ports:
+        - protocol: TCP
+          port: 465  # SMTP 서버의 포트 (예: 465, 587 등)
